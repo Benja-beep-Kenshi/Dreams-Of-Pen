@@ -1,4 +1,21 @@
 body {
     background-color: #DDCECD;
+    text-align: center;
 
+}
+
+.cont{
+    background-color: #F6E8EA;
+    margin-left: 35%;
+    margin-right: 35%;
+    padding-bottom: 30%;
+    border-radius: 39px;
+}
+
+.cp{
+    background-color: #FFF5F5;
+}
+
+.bot{
+    background-color: #D4A58B;
 }
