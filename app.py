@@ -10,6 +10,10 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/Reseñas')
+def reseñas():
+    return render_template('Reseñas.html')
+
     
 if __name__ == '__main__':
     app.run(debug=True)
