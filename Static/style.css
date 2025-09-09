@@ -1,7 +1,13 @@
+head{
+    display:flex;
+    flex-direction: row;
+}
+
 body {
     background-color: #DDCECD;
     text-align: center;
-
+    font-family:'Courier New', Courier, monospace ;
+    margin-top: 30px;
 }
 
 .cont{
@@ -13,17 +19,18 @@ body {
     padding-top: 10%;
     font-size: large;
     font-family: 'Courier New', Courier, monospace;
-    text-align: left;
 }
 
 
 .cp{
     background-color: #FFF5F5;
-    margin-left: 20%;
-    margin-right: 20%;
+    margin-left: 10%;
+    margin-right: 10%;
     text-align: left;
-    border-radius: 20px;
+    border-radius: 10px;
     margin-bottom: 50%;
+    padding-left: 5px;
+    padding: 5px;
 }
 
 .bot{
@@ -31,8 +38,15 @@ body {
     font-size: larger;
     background-color: #D4A58B;
     padding-top: 10px;
-    padding-left: 10px;
+    padding-left: 20px;
     padding-bottom: 10px;
-    padding-right: 10px;
+    padding-right: 20px;
     border-radius: 30px;
+    margin-bottom: 10px;
+    
+}
+
+.usuario{
+    margin-right: 226px;
+    margin-bottom: 10px;
 }
