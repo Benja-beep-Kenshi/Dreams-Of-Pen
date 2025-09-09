@@ -3,14 +3,19 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     </head>
     <header>
-        <img src="" alt=""><!--Poner logo-->
-        
+            <div class="Login">
+            <img src="{{ url_for('static', filename='imagenes/bin.png')}}" width="150" height="50">
+            </div>
     </header>
     <body>
-        <div>
+        <div class="cont">
             <h2>Reseñas</h2>
-            <a>Mis Reseñas</a>
-            <a>Ver Reseñas</a>
+            <a class="bot">
+                Mis Reseñas
+            </a>
+            <a class="bot">
+                Ver Reseñas
+            </a>
         </div>
     </body>
 </html>
