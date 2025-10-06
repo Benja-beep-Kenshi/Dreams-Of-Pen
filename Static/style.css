@@ -1,0 +1,95 @@
+.Login{
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+
+.dream{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+body {
+    background-color: #DDCECD;
+    font-family:'Courier New', Courier, monospace ;
+    margin-top: 30px;
+}
+
+.tit{
+    text-align: center;
+}
+
+.cont{
+    background-color: #F6E8EA;
+    margin-left: 35%;
+    margin-right: 35%;
+    padding-bottom: 5%;
+    border-radius: 39px;
+    padding-top: 10%;
+    font-size: large;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+}
+
+
+.cp{
+    background-color: #FFF5F5;
+    margin-left: 10%;
+    margin-right: 10%;
+    text-align: left;
+    border-radius: 10px;
+    margin-bottom: 50%;
+    padding-left: 5px;
+    padding: 5px;
+    color: gray;
+}
+
+.bot{
+    text-align: center;
+    font-size: larger;
+    background-color: #D4A58B;
+    padding-top: 10px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    padding-right: 20px;
+    border-radius: 30px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: black;
+}
+
+.usuario{
+    margin-right: 226px;
+    margin-bottom: 10px;
+}
+
+.cont2{
+    display: flex;
+    flex-direction: column;
+    background-color: #F6E8EA;
+    margin-left: 35%;
+    margin-right: 35%;
+    padding-bottom: 5%;
+    border-radius: 39px;
+    padding-top: 5%;
+    font-size: large;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+}
+
+.boto{
+    align-items: center;
+    text-align: center;
+    font-size: larger;
+    background-color: #D4A58B;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 30px;
+    margin-bottom: 40px;
+    margin-left: 20%;
+    margin-right: 20%;
+    text-decoration: none;
+    color: black;
+}
