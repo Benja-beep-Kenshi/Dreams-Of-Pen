@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        
+    </head>
+    <header>
+        <div class="Login">
+            <img src="{{ url_for('static', filename='imagenes/bin.png')}}" width="150" height="50">
+            <h1 class="dream">Dreams of Pen</h1>
+        </div>
+    </header>
+    <body>
+        <div class="cont">
+            <a class="usuario">Usuario:</a>
+            <div class="cp">ingrese Usuario</div>
+            <a href="{{ url_for('reseñas') }}" class="bot">
+                Ingresar
+            </a>
+        </div>
+    </body>
+</html>

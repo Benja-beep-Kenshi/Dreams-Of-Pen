@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <header>
+        <h1>Dreams of Pen</h1>
+        <img src="" alt=""><!--Poner logo-->
+        
+    </header>
+    <body>
+        <div class="cont2">
+            <h2>Ver Reseñas</h2>
+            <a href="{{ url_for('busquedamarca')}}" class="boto">
+                Por Marca
+            </a>
+            <a href="{{ url_for('busquedausuario')}}" class="boto">
+                Usuarios
+            </a>
+        </div>
+    </body>
+</html>

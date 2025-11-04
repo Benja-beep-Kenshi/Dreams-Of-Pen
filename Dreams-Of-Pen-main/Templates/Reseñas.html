@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <header>
+            <div class="Login">
+            <img src="{{ url_for('static', filename='imagenes/bin.png')}}" width="150" height="50">
+            </div>
+    </header>
+    <body>
+        <div class="cont2">
+            <h2>Reseñas</h2>
+            <a href="{{ url_for('mis_reseñas')}}" class="boto">
+                Mis Reseñas
+            </a>
+            <a href="{{ url_for('ver_reseñas')}}" class="boto">
+                Ver Reseñas
+            </a>
+        </div>
+    </body>
+</html>
