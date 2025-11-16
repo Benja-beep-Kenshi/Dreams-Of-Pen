@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <header></header>
+
+    <body>
+        <div>
+            <img src="{{ url_for('static', filename='imagenes/bin.png') }}">
+            <a class="barraDeBusqueda">Mis reseñas</a>
+        </div>
+
+        {% for r in reviews %}
+        <div>
+            <div>
+                <div>
+                    <a>{{ r.modelo }} ({{ r.marca }})</a>
+                    <p>{{ r.texto }}</p>
+                </div>
+                <div>
+                    <p>Puntuación: {{ r.puntuacion }}</p>
+                    <a>{{ session.usuario }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </body>
+</html>

@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <header>
+        <img src="{{ url_for('static', filename='imagenes/bin.png')}}" width="150" height="50">
+    </header>
+
+    <body>
+        <div class="cont2">
+            <h2>Mis Reseñas</h2>
+
+            <a href="{{ url_for('crear') }}" class="boto">Crear</a>
+            <a href="{{ url_for('vermias') }}" class="boto">Ver</a>
+
+            {% for r in reviews %}
+                <div class="item">
+                    <p><b>Marca:</b> {{ r.marca }} </p>
+                    <p><b>Modelo:</b> {{ r.modelo }}</p>
+                    <p><b>Puntuación:</b> {{ r.puntuacion }}</p>
+                    <p><b>Texto:</b> {{ r.texto }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </body>
+</html>

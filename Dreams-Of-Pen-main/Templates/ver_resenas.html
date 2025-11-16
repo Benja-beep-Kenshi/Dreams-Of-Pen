@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <header>
+        <h1>Dreams of Pen</h1>
+        <img src="{{ url_for('static', filename='imagenes/bin.png') }}">
+    </header>
+
+    <body>
+        <div class="cont2">
+            <h2>Ver Reseñas</h2>
+
+            <a href="{{ url_for('busquedaMarca') }}" class="boto">Por Marca</a>
+            <a href="{{ url_for('busquedaUsuario') }}" class="boto">Usuarios</a>
+
+            {% for r in reviews %}
+                <div class="item">
+                    <p><b>Usuario:</b> {{ r.usuario }}</p>
+                    <p><b>Marca:</b> {{ r.marca }}</p>
+                    <p><b>Modelo:</b> {{ r.modelo }}</p>
+                    <p><b>Puntuación:</b> {{ r.puntuacion }}</p>
+                    <p>{{ r.texto }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </body>
+</html>

@@ -2,21 +2,28 @@
     <head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     </head>
-    <header>
-        
-    </header>
+
     <body>
         <div class="contb">
-            <img src="static/Imagenes/bin.png" width="200" height="100" class="log"><!--Poner logo-->
-            <div class="contb2">
+            <img src="{{ url_for('static', filename='imagenes/bin.png') }}" width="200" height="100" class="log">
+
+            <form method="POST" action="{{ url_for('busquedaUsuario') }}" class="contb2">
                 <a class="barraDeBusqueda">Nombre de usuario</a>
-            </div>
+                <input type="text" name="usuario" required>
+                <button type="submit">Buscar</button>
+            </form>
+
             <div class="contc">
-                <div>
-               
-                
-                </div>
+                {% for r in reviews %}
+                    <div>
+                        <p><b>{{ r.usuario }}</b></p>
+                        <p>{{ r.marca }} - {{ r.modelo }}</p>
+                        <p>Puntuación: {{ r.puntuacion }}</p>
+                        <p>{{ r.texto }}</p>
+                    </div>
+                {% endfor %}
             </div>
-    </div>
+
+        </div>
     </body>
 </html>

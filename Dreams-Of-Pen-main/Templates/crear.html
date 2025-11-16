@@ -2,28 +2,37 @@
     <head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     </head>
+
     <header>
         <h1>Dreams of Pen</h1>
-        <img src="" alt=""><!--Poner logo-->
-        
+        <img src="{{ url_for('static', filename='imagenes/bin.png') }}">
     </header>
+
     <body>
-        <div>
+        <form method="POST" action="{{ url_for('crear') }}">
+
             <div>
-                <div>
-                    <a>Marca</a>
-                </div>
-                <div>
-                    <img><img><img><img><img>
-                </div>
+                <a>Marca</a>
+                <input type="text" name="marca" required>
             </div>
+
+            <div>
+                <a>Modelo</a>
+                <input type="text" name="modelo" required>
+            </div>
+
             <div>
                 <a>Descripción</a>
+                <textarea name="texto" required></textarea>
             </div>
+
             <div>
-                <a>Descripción</a>
-                <button>guardar</button>
+                <a>Puntuación</a>
+                <input type="number" name="puntuacion" min="1" max="10" required>
             </div>
-        </div>
+
+            <button type="submit">Guardar</button>
+
+        </form>
     </body>
 </html>

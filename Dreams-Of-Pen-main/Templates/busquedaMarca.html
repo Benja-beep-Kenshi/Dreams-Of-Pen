@@ -2,24 +2,28 @@
     <head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     </head>
-    <header>
 
-        
-    </header>
     <body>
         <div class="contb">
-            <img src="static/Imagenes/bin.png" width="200" height="100" class="log"><!--Poner logo-->
-            <div class="contb2">
-            <a class="barraDeBusqueda">Marca de lapicera</a>
-        </div>
-        <div class="contc">
-            <div>
-                <div>
-                    <img><!--Poner lapicera de ejemplo-->
-                </div>
-                <div>
-                </div>
+            <img src="{{ url_for('static', filename='imagenes/bin.png') }}" width="200" height="100" class="log">
+
+            <form method="POST" action="{{ url_for('busquedaMarca') }}" class="contb2">
+                <a class="barraDeBusqueda">Marca de lapicera</a>
+                <input type="text" name="marca" required>
+                <button type="submit">Buscar</button>
+            </form>
+
+            <div class="contc">
+                {% for r in reviews %}
+                    <div>
+                        <p><b>{{ r.marca }}</b> - {{ r.modelo }}</p>
+                        <p>Puntuación: {{ r.puntuacion }}</p>
+                        <p>{{ r.texto }}</p>
+                        <p>Usuario: {{ r.usuario }}</p>
+                    </div>
+                {% endfor %}
             </div>
+
         </div>
     </body>
 </html>
