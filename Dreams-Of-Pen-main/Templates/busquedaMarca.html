@@ -1,29 +1,52 @@
 <html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <title>Buscar por Marca - Dreams of Pen</title>
+</head>
 
-    <body>
-        <div class="contb">
-            <img src="{{ url_for('static', filename='imagenes/bin.png') }}" width="200" height="100" class="log">
+<body>
+    <div class="contb">
+        <img src="{{ url_for('static', filename='imagenes/bin.png') }}" class="log" alt="Dreams of Pen" onclick="window.history.back()" style="cursor: pointer;">
 
-            <form method="POST" action="{{ url_for('busquedaMarca') }}" class="contb2">
-                <a class="barraDeBusqueda">Marca de lapicera</a>
-                <input type="text" name="marca" required>
+        <div class="contb2">
+            <form method="POST" action="{{ url_for('busquedaMarca') }}">
+                <label class="barraDeBusqueda">Marca de lapicera</label>
+                <input type="text" name="marca" placeholder="Ej: Parker, Pilot, BIC..." required>
                 <button type="submit">Buscar</button>
             </form>
-
-            <div class="contc">
-                {% for r in reviews %}
-                    <div>
-                        <p><b>{{ r.marca }}</b> - {{ r.modelo }}</p>
-                        <p>Puntuación: {{ r.puntuacion }}</p>
-                        <p>{{ r.texto }}</p>
-                        <p>Usuario: {{ r.usuario }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-
         </div>
-    </body>
+
+        <div class="contc">
+            {% if reviews %}
+                {% for r in reviews %}
+                <div>
+                    {% if r.imagen %}
+                    <img src="{{ url_for('static', filename='uploads/' + r.imagen) }}" class="resena-image" alt="{{ r.modelo }}" style="max-width: 200px; border-radius: 8px; margin-bottom: 10px;">
+                    {% endif %}
+                    <p><b>{{ r.marca }}</b> - {{ r.modelo }}</p>
+                    <div class="rating-display" style="margin: 10px 0;">
+                        {% for i in range(1, 6) %}
+                        <div class="pen-cap">
+                            <svg width="28" height="28" viewBox="0 0 40 120" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="8" y="10" width="24" height="90" rx="3" fill="{% if i <= r.puntuacion %}#C85A54{% else %}#999{% endif %}"/>
+                                <ellipse cx="20" cy="10" rx="12" ry="8" fill="{% if i <= r.puntuacion %}#C85A54{% else %}#999{% endif %}"/>
+                                <path d="M 32 25 Q 38 30 38 40 Q 38 50 32 55 L 32 25" fill="{% if i <= r.puntuacion %}#C85A54{% else %}#999{% endif %}" opacity="0.3"/>
+                                <ellipse cx="20" cy="100" rx="12" ry="6" fill="{% if i <= r.puntuacion %}#C85A54{% else %}#999{% endif %}" opacity="0.8"/>
+                                <line x1="8" y1="95" x2="32" y2="95" stroke="white" stroke-width="1" opacity="0.3"/>
+                            </svg>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <p>{{ r.texto }}</p>
+                    <p><small>Usuario: {{ r.usuario }}</small></p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: #999;">No hay reseñas para mostrar. Intenta buscar una marca.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
 </html>

@@ -1,257 +1,269 @@
-import mysql.connector
+import sqlite3
+import os
+from werkzeug.utils import secure_filename
 from flask import Flask, render_template, redirect, request, url_for, session
 
 app = Flask(__name__)
-app.secret_key = "clave_ultra_secreta_para_sesiones"  # cambia si querés
+app.secret_key = "clave_ultra_secreta"
 
-# -------------------------
-# Conexión a MySQL
-# -------------------------
-conexion = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database="dreamsOfPen"
-)
-cursor = conexion.cursor(dictionary=True)
+DB_NAME = "dreamsOfPen.db"
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
-# -------------------------
-# Helpers
-# -------------------------
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Crear carpeta de uploads si no existe
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# ============================================================
+#  CREAR BD Y TABLAS SI NO EXISTEN
+# ============================================================
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS usuario (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_name TEXT UNIQUE NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS marca (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT UNIQUE NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS lapicera (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            modelo TEXT NOT NULL,
+            id_marca INTEGER NOT NULL,
+            FOREIGN KEY (id_marca) REFERENCES marca(id)
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS review (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            texto TEXT NOT NULL,
+            puntuacion INTEGER NOT NULL,
+            id_usuario INTEGER NOT NULL,
+            id_lapicera INTEGER NOT NULL,
+            FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+            FOREIGN KEY (id_lapicera) REFERENCES lapicera(id)
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+# ===================== HELPERS ===============================
+
+def query(sql, params=(), one=False):
+    """Consulta que devuelve diccionarios, no tuplas."""
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(sql, params)
+    data = cursor.fetchall()
+    conn.close()
+    return (data[0] if data else None) if one else data
+
+
+def execute(sql, params=()):
+    """Ejecutar INSERT/UPDATE/DELETE."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(sql, params)
+    conn.commit()
+    conn.close()
+
+
+# ===================== LÓGICA DE USUARIOS ====================
+
 def get_usuario_id(nombre):
-    """Devuelve id de usuario o None"""
-    cursor.execute("SELECT id FROM usuario WHERE user_name = %s", (nombre,))
-    row = cursor.fetchone()
+    row = query("SELECT id FROM usuario WHERE user_name = ?", (nombre,), one=True)
     return row["id"] if row else None
 
+
 def asegurar_usuario(nombre):
-    """Crea el usuario si no existe y devuelve su id"""
     uid = get_usuario_id(nombre)
     if uid:
         return uid
-    cursor.execute("INSERT INTO usuario (user_name) VALUES (%s)", (nombre,))
-    conexion.commit()
-    return cursor.lastrowid
+    execute("INSERT INTO usuario (user_name) VALUES (?)", (nombre,))
+    return get_usuario_id(nombre)
+
 
 def asegurar_marca(nombre):
-    cursor.execute("SELECT id FROM marca WHERE nombre = %s", (nombre,))
-    row = cursor.fetchone()
+    row = query("SELECT id FROM marca WHERE nombre = ?", (nombre,), one=True)
     if row:
         return row["id"]
-    cursor.execute("INSERT INTO marca (nombre) VALUES (%s)", (nombre,))
-    conexion.commit()
-    return cursor.lastrowid
+    execute("INSERT INTO marca (nombre) VALUES (?)", (nombre,))
+    return query("SELECT id FROM marca WHERE nombre = ?", (nombre,), one=True)["id"]
+
 
 def asegurar_lapicera(modelo, id_marca):
-    cursor.execute("SELECT id FROM lapicera WHERE modelo = %s AND id_marca = %s", (modelo, id_marca))
-    row = cursor.fetchone()
+    row = query("SELECT id FROM lapicera WHERE modelo = ? AND id_marca = ?", (modelo, id_marca), one=True)
     if row:
         return row["id"]
-    cursor.execute("INSERT INTO lapicera (modelo, id_marca) VALUES (%s, %s)", (modelo, id_marca))
-    conexion.commit()
-    return cursor.lastrowid
+    execute("INSERT INTO lapicera (modelo, id_marca) VALUES (?, ?)", (modelo, id_marca))
+    return query("SELECT id FROM lapicera WHERE modelo = ? AND id_marca = ?", (modelo, id_marca), one=True)["id"]
 
-# -------------------------
-# INDEX (login simple expected)
-# -------------------------
+
+# ===================== RUTAS ================================
+
 @app.route("/")
 def index():
-    # index.html en tu repo tiene un "Ingresar" (no necesariamente un form)
-    # Si querés que Ingresar haga POST, cambiá el template para enviar a /login
     return render_template("index.html")
+
 
 @app.route("/login", methods=["POST"])
 def login():
-    # intenta obtener usuario desde el formulario
     nombre = request.form.get("usuario")
     if not nombre:
         return redirect(url_for("index"))
-    # aseguramos usuario en DB y guardamos en session
     asegurar_usuario(nombre)
     session["usuario"] = nombre
     return redirect(url_for("resenas"))
+
 
 @app.route("/logout")
 def logout():
     session.pop("usuario", None)
     return redirect(url_for("index"))
 
-# -------------------------
-# MENU PRINCIPAL (Reseñas)
-# -------------------------
+
 @app.route("/resenas")
 def resenas():
+    if "usuario" not in session:
+        return redirect(url_for("index"))
     return render_template("resenas.html")
 
-# -------------------------
-# VER TODAS LAS RESEÑAS
-# -------------------------
+
 @app.route("/ver_resenas")
 def ver_resenas():
-    cursor.execute("""
-        SELECT 
-            usuario.user_name AS usuario,
-            lapicera.modelo AS modelo,
-            marca.nombre AS marca,
-            review.puntuacion AS puntuacion,
-            review.texto AS texto
-        FROM review
-        JOIN usuario ON review.id_usuario = usuario.id
-        JOIN lapicera ON review.id_lapicera = lapicera.id
-        JOIN marca ON lapicera.id_marca = marca.id
-        ORDER BY review.id DESC
-    """)
-    datos = cursor.fetchall()
-    return render_template("ver_resenas.html", reviews=datos)
+    if "usuario" not in session:
+        return redirect(url_for("index"))
+    return render_template("ver_resenas.html")
 
-# -------------------------
-# MIS RESEÑAS
-# -------------------------
+
 @app.route("/mis_resenas")
 def mis_resenas():
-    usuario = session.get("usuario")
-    if not usuario:
+    nombre = session.get("usuario")
+    if not nombre:
         return redirect(url_for("index"))
-    uid = get_usuario_id(usuario)
-    if not uid:
-        return render_template("mis_resenas.html", reviews=[])
-    cursor.execute("""
-        SELECT 
-            lapicera.modelo AS modelo,
-            marca.nombre AS marca,
-            review.puntuacion AS puntuacion,
-            review.texto AS texto
-        FROM review
-        JOIN lapicera ON review.id_lapicera = lapicera.id
-        JOIN marca ON lapicera.id_marca = marca.id
-        WHERE review.id_usuario = %s
-        ORDER BY review.id DESC
-    """, (uid,))
-    datos = cursor.fetchall()
-    return render_template("mis_resenas.html", reviews=datos)
+    return render_template("mis_resenas.html")
 
-# -------------------------
-# CREAR RESEÑA
-# -------------------------
+
 @app.route("/crear", methods=["GET", "POST"])
 def crear():
-    usuario = session.get("usuario")
+    nombre = session.get("usuario")
+    if not nombre:
+        return redirect(url_for("index"))
+        
     if request.method == "POST":
-        # campos esperados (según los templates que armamos)
-        marca = request.form.get("marca") or request.form.get("titulo") or ""
-        modelo = request.form.get("modelo") or ""
-        texto = request.form.get("texto") or request.form.get("reseña") or request.form.get("descripcion") or ""
-        puntuacion = request.form.get("puntuacion") or request.form.get("puntuación") or None
+        marca = request.form.get("marca")
+        modelo = request.form.get("modelo")
+        texto = request.form.get("texto")
+        puntuacion = int(request.form.get("puntuacion"))
 
-        # convertimos puntuacion a int si viene
-        try:
-            puntuacion = int(puntuacion) if puntuacion is not None and puntuacion != "" else None
-        except ValueError:
-            puntuacion = None
-
-        # si no hay usuario en sesión, lo dejamos 'Invitado' y lo creamos
-        if not usuario:
-            usuario = "Invitado"
-            asegurar_usuario(usuario)
-
-        uid = asegurar_usuario(usuario)
+        uid = asegurar_usuario(nombre)
         mid = asegurar_marca(marca)
         lid = asegurar_lapicera(modelo, mid)
 
-        # si no vino puntuacion, ponemos 0
-        if puntuacion is None:
-            puntuacion = 0
-
-        cursor.execute("""
+        execute("""
             INSERT INTO review (texto, puntuacion, id_usuario, id_lapicera)
-            VALUES (%s, %s, %s, %s)
+            VALUES (?, ?, ?, ?)
         """, (texto, puntuacion, uid, lid))
-        conexion.commit()
-        return redirect(url_for("ver_resenas"))
 
-    # GET -> mostrar formulario. En algunos templates podrías querer pasar marcas existentes
-    cursor.execute("SELECT id, nombre FROM marca ORDER BY nombre")
-    marcas = cursor.fetchall()
-    return render_template("crear.html", marcas=marcas)
+        return redirect(url_for("vermias"))
 
-# -------------------------
-# VERMIA(S) - ver mis (mantengo endpoint que tenías)
-# -------------------------
+    return render_template("crear.html")
+
+
 @app.route("/vermias")
 def vermias():
-    usuario = session.get("usuario")
-    if not usuario:
+    nombre = session.get("usuario")
+    if not nombre:
         return redirect(url_for("index"))
-    uid = get_usuario_id(usuario)
-    if not uid:
-        return render_template("vermias.html", reviews=[])
-    cursor.execute("""
-        SELECT 
-            lapicera.modelo AS modelo,
-            marca.nombre AS marca,
-            review.puntuacion AS puntuacion,
-            review.texto AS texto
+    uid = get_usuario_id(nombre)
+
+    datos = query("""
+        SELECT lapicera.modelo AS modelo,
+               marca.nombre AS marca,
+               review.puntuacion AS puntuacion,
+               review.texto AS texto
         FROM review
         JOIN lapicera ON review.id_lapicera = lapicera.id
         JOIN marca ON lapicera.id_marca = marca.id
-        WHERE review.id_usuario = %s
+        WHERE review.id_usuario = ?
         ORDER BY review.id DESC
     """, (uid,))
-    datos = cursor.fetchall()
+
     return render_template("vermias.html", reviews=datos)
 
-# -------------------------
-# BUSQUEDA POR MARCA
-# -------------------------
+
 @app.route("/busquedaMarca", methods=["GET", "POST"])
 def busquedaMarca():
+    if "usuario" not in session:
+        return redirect(url_for("index"))
+        
     resultados = []
     if request.method == "POST":
-        marca = request.form.get("marca") or request.form.get("q") or ""
-        cursor.execute("""
-            SELECT 
-                usuario.user_name AS usuario,
-                lapicera.modelo AS modelo,
-                marca.nombre AS marca,
-                review.puntuacion AS puntuacion,
-                review.texto AS texto
+        marca = request.form.get("marca")
+        resultados = query("""
+            SELECT usuario.user_name AS usuario,
+                   lapicera.modelo AS modelo,
+                   marca.nombre AS marca,
+                   review.puntuacion AS puntuacion,
+                   review.texto AS texto
             FROM review
             JOIN usuario ON review.id_usuario = usuario.id
             JOIN lapicera ON review.id_lapicera = lapicera.id
             JOIN marca ON lapicera.id_marca = marca.id
-            WHERE marca.nombre LIKE %s
-            ORDER BY review.id DESC
+            WHERE marca.nombre LIKE ?
         """, ("%" + marca + "%",))
-        resultados = cursor.fetchall()
+
     return render_template("busquedaMarca.html", reviews=resultados)
 
-# -------------------------
-# BUSQUEDA POR USUARIO
-# -------------------------
+
 @app.route("/busquedaUsuario", methods=["GET", "POST"])
 def busquedaUsuario():
+    if "usuario" not in session:
+        return redirect(url_for("index"))
+        
     resultados = []
     if request.method == "POST":
-        usuario = request.form.get("usuario") or request.form.get("q") or ""
-        cursor.execute("""
-            SELECT 
-                usuario.user_name AS usuario,
-                lapicera.modelo AS modelo,
-                marca.nombre AS marca,
-                review.puntuacion AS puntuacion,
-                review.texto AS texto
+        usuario = request.form.get("usuario")
+        resultados = query("""
+            SELECT usuario.user_name AS usuario,
+                   lapicera.modelo AS modelo,
+                   marca.nombre AS marca,
+                   review.puntuacion AS puntuacion,
+                   review.texto AS texto
             FROM review
             JOIN usuario ON review.id_usuario = usuario.id
             JOIN lapicera ON review.id_lapicera = lapicera.id
             JOIN marca ON lapicera.id_marca = marca.id
-            WHERE usuario.user_name = %s
-            ORDER BY review.id DESC
+            WHERE usuario.user_name = ?
         """, (usuario,))
-        resultados = cursor.fetchall()
+
     return render_template("busquedaUsuario.html", reviews=resultados)
 
-# -------------------------
-# RUN
-# -------------------------
+
+
+# ============================================================
+#  INICIALIZAR BD Y CORRER
+# ============================================================
 if __name__ == "__main__":
+    init_db()
     app.run(debug=True)

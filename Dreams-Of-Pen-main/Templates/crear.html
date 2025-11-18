@@ -1,38 +1,149 @@
 <html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <title>Crear Reseña - Dreams of Pen</title>
+</head>
 
-    <header>
-        <h1>Dreams of Pen</h1>
-        <img src="{{ url_for('static', filename='imagenes/bin.png') }}">
-    </header>
+<header>
+    <img src="{{ url_for('static', filename='imagenes/bin.png') }}" alt="Dreams of Pen" onclick="window.history.back()" style="cursor: pointer;">
+    <h1 class="dream">Dreams of Pen</h1>
+</header>
 
-    <body>
-        <form method="POST" action="{{ url_for('crear') }}">
+<body>
+    <form method="POST" action="{{ url_for('crear') }}" enctype="multipart/form-data" onsubmit="return validateForm()">
+        <div>
+            <a>Marca</a>
+            <input type="text" name="marca" placeholder="Ej: Parker, Pilot..." required>
+        </div>
 
-            <div>
-                <a>Marca</a>
-                <input type="text" name="marca" required>
+        <div>
+            <a>Modelo</a>
+            <input type="text" name="modelo" placeholder="Ej: Vector, G2..." required>
+        </div>
+
+        <div class="image-upload-container">
+            <a>Imagen de la lapicera *</a>
+            <label for="imagen" class="image-upload-label">
+                <span id="upload-text">📷 Haz clic para subir una imagen</span>
+                <img id="preview" style="display: none;">
+            </label>
+            <input type="file" id="imagen" name="imagen" accept="image/*" required onchange="previewImage(event)">
+        </div>
+
+        <div>
+            <a>Descripción</a>
+            <textarea name="texto" placeholder="Escribe tu opinión sobre esta lapicera..." required></textarea>
+        </div>
+
+        <div class="rating-container">
+            <a>Puntuación (1-5) *</a>
+            <div class="rating-caps" id="rating-selector">
+                <div class="pen-cap empty" data-value="1" onclick="setRating(1)">
+                    <svg width="35" height="35" viewBox="0 0 40 120" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="10" width="24" height="90" rx="3" fill="#999"/>
+                        <ellipse cx="20" cy="10" rx="12" ry="8" fill="#999"/>
+                        <path d="M 32 25 Q 38 30 38 40 Q 38 50 32 55 L 32 25" fill="#999" opacity="0.3"/>
+                        <ellipse cx="20" cy="100" rx="12" ry="6" fill="#999" opacity="0.8"/>
+                        <line x1="8" y1="95" x2="32" y2="95" stroke="white" stroke-width="1" opacity="0.3"/>
+                    </svg>
+                </div>
+                <div class="pen-cap empty" data-value="2" onclick="setRating(2)">
+                    <svg width="35" height="35" viewBox="0 0 40 120" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="10" width="24" height="90" rx="3" fill="#999"/>
+                        <ellipse cx="20" cy="10" rx="12" ry="8" fill="#999"/>
+                        <path d="M 32 25 Q 38 30 38 40 Q 38 50 32 55 L 32 25" fill="#999" opacity="0.3"/>
+                        <ellipse cx="20" cy="100" rx="12" ry="6" fill="#999" opacity="0.8"/>
+                        <line x1="8" y1="95" x2="32" y2="95" stroke="white" stroke-width="1" opacity="0.3"/>
+                    </svg>
+                </div>
+                <div class="pen-cap empty" data-value="3" onclick="setRating(3)">
+                    <svg width="35" height="35" viewBox="0 0 40 120" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="10" width="24" height="90" rx="3" fill="#999"/>
+                        <ellipse cx="20" cy="10" rx="12" ry="8" fill="#999"/>
+                        <path d="M 32 25 Q 38 30 38 40 Q 38 50 32 55 L 32 25" fill="#999" opacity="0.3"/>
+                        <ellipse cx="20" cy="100" rx="12" ry="6" fill="#999" opacity="0.8"/>
+                        <line x1="8" y1="95" x2="32" y2="95" stroke="white" stroke-width="1" opacity="0.3"/>
+                    </svg>
+                </div>
+                <div class="pen-cap empty" data-value="4" onclick="setRating(4)">
+                    <svg width="35" height="35" viewBox="0 0 40 120" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="10" width="24" height="90" rx="3" fill="#999"/>
+                        <ellipse cx="20" cy="10" rx="12" ry="8" fill="#999"/>
+                        <path d="M 32 25 Q 38 30 38 40 Q 38 50 32 55 L 32 25" fill="#999" opacity="0.3"/>
+                        <ellipse cx="20" cy="100" rx="12" ry="6" fill="#999" opacity="0.8"/>
+                        <line x1="8" y1="95" x2="32" y2="95" stroke="white" stroke-width="1" opacity="0.3"/>
+                    </svg>
+                </div>
+                <div class="pen-cap empty" data-value="5" onclick="setRating(5)">
+                    <svg width="35" height="35" viewBox="0 0 40 120" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="10" width="24" height="90" rx="3" fill="#999"/>
+                        <ellipse cx="20" cy="10" rx="12" ry="8" fill="#999"/>
+                        <path d="M 32 25 Q 38 30 38 40 Q 38 50 32 55 L 32 25" fill="#999" opacity="0.3"/>
+                        <ellipse cx="20" cy="100" rx="12" ry="6" fill="#999" opacity="0.8"/>
+                        <line x1="8" y1="95" x2="32" y2="95" stroke="white" stroke-width="1" opacity="0.3"/>
+                    </svg>
+                </div>
             </div>
+            <input type="hidden" id="puntuacion" name="puntuacion" value="" required>
+        </div>
 
-            <div>
-                <a>Modelo</a>
-                <input type="text" name="modelo" required>
-            </div>
+        <button type="submit">Guardar Reseña</button>
+    </form>
 
-            <div>
-                <a>Descripción</a>
-                <textarea name="texto" required></textarea>
-            </div>
+    <script>
+        let selectedRating = 0;
 
-            <div>
-                <a>Puntuación</a>
-                <input type="number" name="puntuacion" min="1" max="10" required>
-            </div>
+        function setRating(rating) {
+            selectedRating = rating;
+            document.getElementById('puntuacion').value = rating;
+            
+            const caps = document.querySelectorAll('.pen-cap');
+            caps.forEach((cap, index) => {
+                const value = index + 1;
+                const svg = cap.querySelector('svg');
+                const rects = svg.querySelectorAll('rect, ellipse, path');
+                
+                if (value <= rating) {
+                    cap.classList.remove('empty');
+                    cap.classList.add('filled');
+                    rects.forEach(el => {
+                        el.setAttribute('fill', '#C85A54');
+                    });
+                } else {
+                    cap.classList.remove('filled');
+                    cap.classList.add('empty');
+                    rects.forEach(el => {
+                        el.setAttribute('fill', '#999');
+                    });
+                }
+            });
+        }
 
-            <button type="submit">Guardar</button>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('preview');
+            const uploadText = document.getElementById('upload-text');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    uploadText.textContent = 'Cambiar imagen';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
 
-        </form>
-    </body>
+        function validateForm() {
+            if (selectedRating === 0) {
+                alert('Por favor selecciona una puntuación haciendo clic en las tapitas');
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
 </html>

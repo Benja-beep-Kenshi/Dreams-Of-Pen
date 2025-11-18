@@ -1,29 +1,37 @@
 <html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <title>Buscar por Usuario - Dreams of Pen</title>
+</head>
 
-    <body>
-        <div class="contb">
-            <img src="{{ url_for('static', filename='imagenes/bin.png') }}" width="200" height="100" class="log">
+<body>
+    <div class="contb">
+        <img src="{{ url_for('static', filename='imagenes/bin.png') }}" class="log" alt="Dreams of Pen" onclick="window.history.back()" style="cursor: pointer;">
 
-            <form method="POST" action="{{ url_for('busquedaUsuario') }}" class="contb2">
-                <a class="barraDeBusqueda">Nombre de usuario</a>
-                <input type="text" name="usuario" required>
+        <div class="contb2">
+            <form method="POST" action="{{ url_for('busquedaUsuario') }}">
+                <label class="barraDeBusqueda">Nombre de usuario</label>
+                <input type="text" name="usuario" placeholder="Ingrese nombre de usuario..." required>
                 <button type="submit">Buscar</button>
             </form>
-
-            <div class="contc">
-                {% for r in reviews %}
-                    <div>
-                        <p><b>{{ r.usuario }}</b></p>
-                        <p>{{ r.marca }} - {{ r.modelo }}</p>
-                        <p>Puntuación: {{ r.puntuacion }}</p>
-                        <p>{{ r.texto }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-
         </div>
-    </body>
+
+        <div class="contc">
+            {% if reviews %}
+                {% for r in reviews %}
+                <div>
+                    <p><b>{{ r.usuario }}</b></p>
+                    <p>{{ r.marca }} - {{ r.modelo }}</p>
+                    <p>Puntuación: {{ r.puntuacion }}/5</p>
+                    <p>{{ r.texto }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: #999;">No hay reseñas para mostrar. Intenta buscar un usuario.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
 </html>

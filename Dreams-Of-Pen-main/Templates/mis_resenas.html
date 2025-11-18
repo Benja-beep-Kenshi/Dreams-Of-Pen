@@ -1,27 +1,21 @@
 <html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <title>Mis Reseñas - Dreams of Pen</title>
+</head>
 
-    <header>
-        <img src="{{ url_for('static', filename='imagenes/bin.png')}}" width="150" height="50">
-    </header>
+<header>
+    <img src="{{ url_for('static', filename='imagenes/bin.png')}}" alt="Dreams of Pen" onclick="window.history.back()" style="cursor: pointer;">
+</header>
 
-    <body>
-        <div class="cont2">
-            <h2>Mis Reseñas</h2>
+<body>
+    <div class="cont2">
+        <h2>Mis Reseñas</h2>
 
-            <a href="{{ url_for('crear') }}" class="boto">Crear</a>
-            <a href="{{ url_for('vermias') }}" class="boto">Ver</a>
-
-            {% for r in reviews %}
-                <div class="item">
-                    <p><b>Marca:</b> {{ r.marca }} </p>
-                    <p><b>Modelo:</b> {{ r.modelo }}</p>
-                    <p><b>Puntuación:</b> {{ r.puntuacion }}</p>
-                    <p><b>Texto:</b> {{ r.texto }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </body>
+        <a href="{{ url_for('crear') }}" class="boto">Crear</a>
+        <a href="{{ url_for('vermias') }}" class="boto">Ver</a>
+    </div>
+</body>
 </html>
