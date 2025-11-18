@@ -1,23 +1,25 @@
-import sqlite3
 import os
+import sqlite3
+
+from flask import Flask, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
-from flask import Flask, render_template, redirect, request, url_for, session
 
 app = Flask(__name__)
 app.secret_key = "clave_ultra_secreta"
 
 DB_NAME = "dreamsOfPen.db"
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+UPLOAD_FOLDER = "static/uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # Crear carpeta de uploads si no existe
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 # ============================================================
@@ -68,6 +70,7 @@ def init_db():
 
 # ===================== HELPERS ===============================
 
+
 def query(sql, params=(), one=False):
     """Consulta que devuelve diccionarios, no tuplas."""
     conn = sqlite3.connect(DB_NAME)
@@ -89,6 +92,7 @@ def execute(sql, params=()):
 
 
 # ===================== LÓGICA DE USUARIOS ====================
+
 
 def get_usuario_id(nombre):
     row = query("SELECT id FROM usuario WHERE user_name = ?", (nombre,), one=True)
@@ -112,14 +116,23 @@ def asegurar_marca(nombre):
 
 
 def asegurar_lapicera(modelo, id_marca):
-    row = query("SELECT id FROM lapicera WHERE modelo = ? AND id_marca = ?", (modelo, id_marca), one=True)
+    row = query(
+        "SELECT id FROM lapicera WHERE modelo = ? AND id_marca = ?",
+        (modelo, id_marca),
+        one=True,
+    )
     if row:
         return row["id"]
     execute("INSERT INTO lapicera (modelo, id_marca) VALUES (?, ?)", (modelo, id_marca))
-    return query("SELECT id FROM lapicera WHERE modelo = ? AND id_marca = ?", (modelo, id_marca), one=True)["id"]
+    return query(
+        "SELECT id FROM lapicera WHERE modelo = ? AND id_marca = ?",
+        (modelo, id_marca),
+        one=True,
+    )["id"]
 
 
 # ===================== RUTAS ================================
+
 
 @app.route("/")
 def index():
@@ -169,7 +182,7 @@ def crear():
     nombre = session.get("usuario")
     if not nombre:
         return redirect(url_for("index"))
-        
+
     if request.method == "POST":
         marca = request.form.get("marca")
         modelo = request.form.get("modelo")
@@ -180,10 +193,13 @@ def crear():
         mid = asegurar_marca(marca)
         lid = asegurar_lapicera(modelo, mid)
 
-        execute("""
+        execute(
+            """
             INSERT INTO review (texto, puntuacion, id_usuario, id_lapicera)
             VALUES (?, ?, ?, ?)
-        """, (texto, puntuacion, uid, lid))
+        """,
+            (texto, puntuacion, uid, lid),
+        )
 
         return redirect(url_for("vermias"))
 
@@ -197,7 +213,8 @@ def vermias():
         return redirect(url_for("index"))
     uid = get_usuario_id(nombre)
 
-    datos = query("""
+    datos = query(
+        """
         SELECT lapicera.modelo AS modelo,
                marca.nombre AS marca,
                review.puntuacion AS puntuacion,
@@ -207,7 +224,9 @@ def vermias():
         JOIN marca ON lapicera.id_marca = marca.id
         WHERE review.id_usuario = ?
         ORDER BY review.id DESC
-    """, (uid,))
+    """,
+        (uid,),
+    )
 
     return render_template("vermias.html", reviews=datos)
 
@@ -216,11 +235,12 @@ def vermias():
 def busquedaMarca():
     if "usuario" not in session:
         return redirect(url_for("index"))
-        
+
     resultados = []
     if request.method == "POST":
         marca = request.form.get("marca")
-        resultados = query("""
+        resultados = query(
+            """
             SELECT usuario.user_name AS usuario,
                    lapicera.modelo AS modelo,
                    marca.nombre AS marca,
@@ -231,7 +251,9 @@ def busquedaMarca():
             JOIN lapicera ON review.id_lapicera = lapicera.id
             JOIN marca ON lapicera.id_marca = marca.id
             WHERE marca.nombre LIKE ?
-        """, ("%" + marca + "%",))
+        """,
+            ("%" + marca + "%",),
+        )
 
     return render_template("busquedaMarca.html", reviews=resultados)
 
@@ -240,11 +262,12 @@ def busquedaMarca():
 def busquedaUsuario():
     if "usuario" not in session:
         return redirect(url_for("index"))
-        
+
     resultados = []
     if request.method == "POST":
         usuario = request.form.get("usuario")
-        resultados = query("""
+        resultados = query(
+            """
             SELECT usuario.user_name AS usuario,
                    lapicera.modelo AS modelo,
                    marca.nombre AS marca,
@@ -255,10 +278,11 @@ def busquedaUsuario():
             JOIN lapicera ON review.id_lapicera = lapicera.id
             JOIN marca ON lapicera.id_marca = marca.id
             WHERE usuario.user_name = ?
-        """, (usuario,))
+        """,
+            (usuario,),
+        )
 
     return render_template("busquedaUsuario.html", reviews=resultados)
-
 
 
 # ============================================================
